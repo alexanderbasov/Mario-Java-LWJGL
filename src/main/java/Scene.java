@@ -1,5 +1,3 @@
-package ua.basov;
-
 public abstract class Scene {
 
     public Scene() {

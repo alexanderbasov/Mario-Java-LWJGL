@@ -1,5 +1,3 @@
-package ua.basov;
-
 public class LevelScene extends Scene {
 
     public LevelScene() {

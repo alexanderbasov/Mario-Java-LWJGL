@@ -1,5 +1,3 @@
-package ua.basov;
-
 import static java.awt.event.KeyEvent.VK_SPACE;
 
 public class LevelEditorScene extends Scene {
