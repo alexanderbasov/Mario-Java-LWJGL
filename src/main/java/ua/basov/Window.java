@@ -3,6 +3,7 @@ package ua.basov;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
+import ua.basov.util.Time;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -16,14 +17,14 @@ public class Window {
 
     private long glfwWindow;
 
-    private float r;
-    private float g;
-    private float b;
-    private float a;
-
-    private boolean fadeToBlack = false;
+    public float r;
+    public float g;
+    public float b;
+    public float a;
 
     private static Window window = null;
+
+    private static Scene currentScene;
 
     private Window() {
         this.width = 1920;
@@ -33,6 +34,21 @@ public class Window {
         g = 1;
         b = 1;
         a = 1;
+    }
+
+    public static void changeScene(int newScene) {
+        switch (newScene) {
+            case 0:
+                currentScene = new LevelEditorScene();
+//                currentScene.init();
+                break;
+            case 1:
+                currentScene = new LevelScene();
+                break;
+            default:
+                assert false : "Unknown scene '" + newScene + "'";
+                break;
+        }
     }
 
     public static Window get() {
@@ -92,6 +108,9 @@ public class Window {
         // Enable v-sync
         glfwSwapInterval(1);
 
+        // Make the window visible
+        glfwShowWindow(glfwWindow);
+
         // This line is critical for LWJGL's interoperation with GLFW's
         // OpenGL context, or any context that is managed externally.
         // LWJGL detects the context that is current in the current thread,
@@ -99,12 +118,14 @@ public class Window {
         // bindings available for use.
         GL.createCapabilities();
 
-        // Make the window visible
-        glfwShowWindow(glfwWindow);
-
+        Window.changeScene(0);
     }
 
     public void loop() {
+        float beginTime = Time.getTime();
+        float endTime;
+        float dt = -1.0f;
+
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
         while (!glfwWindowShouldClose(glfwWindow)) {
@@ -116,18 +137,15 @@ public class Window {
             glClearColor(r, g, b, a);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
-            if (fadeToBlack) {
-                r = Math.max(r - 0.01f, 0);
-                g = Math.max(g - 0.01f, 0);
-                b = Math.max(b - 0.01f, 0);
-            }
-
-            if (KeyListener.isKeyPressed(GLFW_KEY_SPACE)) {
-                fadeToBlack = true;
+            if (dt >= 0) {
+                currentScene.update(dt);
             }
 
             glfwSwapBuffers(glfwWindow); // swap the color buffers
+
+            endTime = Time.getTime();
+            dt = endTime - beginTime;
+            beginTime = endTime;
         }
     }
-
 }
